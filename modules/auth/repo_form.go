@@ -103,6 +103,7 @@ type RepoSettingForm struct {
 	TrackerURLFormat      string
 	TrackerIssueStyle     string
 	EnablePulls           bool
+	EnableReviews         bool
 }
 
 // Validate validates the fields

@@ -75,7 +75,7 @@ func (r *RepoUnit) BeforeSet(colName string, val xorm.Cell) {
 	switch colName {
 	case "type":
 		switch UnitType(Cell2Int64(val)) {
-		case UnitTypeCode, UnitTypeIssues, UnitTypePullRequests, UnitTypeCommits, UnitTypeReleases,
+		case UnitTypeCode, UnitTypeIssues, UnitTypePullRequests, UnitTypeReviews, UnitTypeCommits, UnitTypeReleases,
 			UnitTypeWiki, UnitTypeSettings:
 			r.Config = new(UnitConfig)
 		case UnitTypeExternalWiki:
@@ -113,6 +113,11 @@ func (r *RepoUnit) IssuesConfig() *UnitConfig {
 
 // PullRequestsConfig returns config for UnitTypePullRequests
 func (r *RepoUnit) PullRequestsConfig() *UnitConfig {
+	return r.Config.(*UnitConfig)
+}
+
+// ReviewsConfig returns config for UnitTypeReviews
+func (r *RepoUnit) ReviewsConfig() *UnitConfig {
 	return r.Config.(*UnitConfig)
 }
 

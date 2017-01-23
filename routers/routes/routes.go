@@ -584,6 +584,8 @@ func RegisterRoutes(m *macaron.Macaron) {
 			m.Post("/merge", reqRepoWriter, repo.MergePullRequest)
 		}, repo.MustAllowPulls, context.CheckUnit(models.UnitTypePullRequests))
 
+		m.Get("/reviews", repo.Reviews)
+
 		m.Group("", func() {
 			m.Get("/src/*", repo.SetEditorconfigIfExists, repo.Home)
 			m.Get("/raw/*", repo.SingleDownload)

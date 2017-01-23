@@ -190,6 +190,7 @@ type Repository struct {
 	NumPulls            int
 	NumClosedPulls      int
 	NumOpenPulls        int `xorm:"-"`
+	NumOpenReviews      int `xorm:"-"`
 	NumMilestones       int `xorm:"NOT NULL DEFAULT 0"`
 	NumClosedMilestones int `xorm:"NOT NULL DEFAULT 0"`
 	NumOpenMilestones   int `xorm:"-"`
@@ -641,9 +642,19 @@ func (repo *Repository) CanEnablePulls() bool {
 	return !repo.IsMirror && !repo.IsBare
 }
 
+// CanEnableReviews returns true if repository meets the requirements of code reviewing.
+func (repo *Repository) CanEnableReviews() bool {
+	return !repo.IsMirror && !repo.IsBare
+}
+
 // AllowsPulls returns true if repository meets the requirements of accepting pulls and has them enabled.
 func (repo *Repository) AllowsPulls() bool {
 	return repo.CanEnablePulls() && repo.EnableUnit(UnitTypePullRequests)
+}
+
+// AllowsReviews returns true if repository meets the requirements of accepting pulls and has them enabled.
+func (repo *Repository) AllowsReviews() bool {
+	return repo.CanEnableReviews() && repo.EnableUnit(UnitTypePullRequests)
 }
 
 // CanEnableEditor returns true if repository meets the requirements of web editor.

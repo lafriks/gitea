@@ -18,6 +18,7 @@ const (
 	UnitTypeSettings                            // 7 Settings
 	UnitTypeExternalWiki                        // 8 ExternalWiki
 	UnitTypeExternalTracker                     // 9 ExternalTracker
+	UnitTypeReviews                             // 10 Reviews
 )
 
 var (
@@ -26,6 +27,7 @@ var (
 		UnitTypeCode,
 		UnitTypeIssues,
 		UnitTypePullRequests,
+		UnitTypeReviews,
 		UnitTypeCommits,
 		UnitTypeReleases,
 		UnitTypeWiki,
@@ -39,6 +41,7 @@ var (
 		UnitTypeCode,
 		UnitTypeIssues,
 		UnitTypePullRequests,
+		UnitTypeReviews,
 		UnitTypeCommits,
 		UnitTypeReleases,
 		UnitTypeWiki,
@@ -102,12 +105,20 @@ var (
 		2,
 	}
 
+	UnitReviews = Unit{
+		UnitTypeReviews,
+		"repo.reviews",
+		"/reviews",
+		"repo.reviews.desc",
+		3,
+	}
+
 	UnitCommits = Unit{
 		UnitTypeCommits,
 		"repo.commits",
 		"/commits/master",
 		"repo.commits.desc",
-		3,
+		4,
 	}
 
 	UnitReleases = Unit{
@@ -115,7 +126,7 @@ var (
 		"repo.releases",
 		"/releases",
 		"repo.releases.desc",
-		4,
+		5,
 	}
 
 	UnitWiki = Unit{
@@ -123,7 +134,7 @@ var (
 		"repo.wiki",
 		"/wiki",
 		"repo.wiki.desc",
-		5,
+		6,
 	}
 
 	UnitExternalWiki = Unit{
@@ -131,7 +142,7 @@ var (
 		"repo.ext_wiki",
 		"/wiki",
 		"repo.ext_wiki.desc",
-		5,
+		6,
 	}
 
 	UnitSettings = Unit{
@@ -139,7 +150,7 @@ var (
 		"repo.settings",
 		"/settings",
 		"repo.settings.desc",
-		6,
+		7,
 	}
 
 	// Units contains all the units
@@ -148,6 +159,7 @@ var (
 		UnitTypeIssues:          UnitIssues,
 		UnitTypeExternalTracker: UnitExternalTracker,
 		UnitTypePullRequests:    UnitPullRequests,
+		UnitTypeReviews:         UnitReviews,
 		UnitTypeCommits:         UnitCommits,
 		UnitTypeReleases:        UnitReleases,
 		UnitTypeWiki:            UnitWiki,

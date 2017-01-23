@@ -215,6 +215,15 @@ func SettingsPost(ctx *context.Context, form auth.RepoSettingForm) {
 			})
 		}
 
+		if form.EnableReviews {
+			units = append(units, models.RepoUnit{
+				RepoID: repo.ID,
+				Type:   models.UnitTypeReviews,
+				Index:  int(models.UnitTypeReviews),
+				Config: new(models.UnitConfig),
+			})
+		}
+
 		if err := models.UpdateRepositoryUnits(repo, units); err != nil {
 			ctx.Handle(500, "UpdateRepositoryUnits", err)
 			return
