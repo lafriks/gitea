@@ -166,8 +166,16 @@
 					<div class="ui checkbox issue-checkbox">
 						<input type="checkbox" data-issue-id={{.ID}}></input>
 					</div>
-					<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">#{{.Index}}</div>
-					<a class="title has-emoji" href="{{$.Link}}/{{.Index}}">{{.Title}}</a>
+
+					{{if .IsReview}}
+						<div><a class="title has-emoji" href="{{$.Link}}/{{.Revision}}">{{.Title}}</a></div>
+						<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">{{.Revision}}</div>
+					{{end}}
+
+					{{if not .IsReview}}
+						<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">#{{.Index}}</div>
+						<a class="title has-emoji" href="{{$.Link}}/{{.Index}}">{{.Title}}</a>
+					{{end}}
 
 					{{range .Labels}}
 						<a class="ui label" href="{{$.Link}}?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}&milestone={{$.MilestoneID}}&assignee={{$.AssigneeID}}" style="color: {{.ForegroundColor}}; background-color: {{.Color}}">{{.Name | Sanitize}}</a>
