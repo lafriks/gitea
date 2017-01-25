@@ -168,13 +168,14 @@
 					</div>
 
 					{{if .IsReview}}
-						<div><a class="title has-emoji" href="{{$.Link}}/{{.Revision}}">{{.Title}}</a></div>
-						<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">{{.Revision}}</div>
+						<a class="title review has-emoji" href="{{$.Link}}/{{.GetIndex}}">{{.Title}}</a>
+						<br/>
+						<div class="revision">{{.GetIndex}}</div>
 					{{end}}
 
 					{{if not .IsReview}}
-						<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">#{{.Index}}</div>
-						<a class="title has-emoji" href="{{$.Link}}/{{.Index}}">{{.Title}}</a>
+						<div class="ui {{if .IsRead}}black{{else}}green{{end}} label">#{{.GetIndex}}</div>
+						<a class="title has-emoji" href="{{$.Link}}/{{.GetIndex}}">{{.Title}}</a>
 					{{end}}
 
 					{{range .Labels}}

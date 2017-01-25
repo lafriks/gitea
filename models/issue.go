@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -282,6 +283,14 @@ func (issue *Issue) APIFormat() *api.Issue {
 	}
 
 	return apiIssue
+}
+
+// GetIndex returns string index for templates
+func (issue *Issue) GetIndex() string {
+	if issue.IsReview {
+		return issue.Revision
+	}
+	return strconv.Itoa(int(issue.Index))
 }
 
 // HashTag returns unique hash tag for issue.

@@ -105,7 +105,7 @@
 		<div class="ui watching">
 			<span class="text"><strong>{{.i18n.Tr "notification.notifications"}}</strong></span>
 			<div>
-				<form method="POST" action="{{$.RepoLink}}/issues/{{.Issue.Index}}/watch">
+				<form method="POST" action="{{$.RepoLink}}/issues/{{.Issue.GetIndex}}/watch">
 					<input type="hidden" name="watch" value="{{if $.IssueWatch.IsWatching}}0{{else}}1{{end}}" />
 					{{$.CsrfTokenHtml}}
 					<button class="fluid ui button">

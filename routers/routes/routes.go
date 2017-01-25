@@ -551,6 +551,8 @@ func RegisterRoutes(m *macaron.Macaron) {
 		m.Group("", func() {
 			m.Get("/^:type(issues|pulls)$", repo.RetrieveLabels, repo.Issues)
 			m.Get("/^:type(issues|pulls)$/:index", repo.ViewIssue)
+			m.Get("/reviews", repo.RetrieveLabels, repo.Reviews)
+			m.Get("/reviews/:index", repo.ViewReview)
 			m.Get("/labels/", repo.RetrieveLabels, repo.Labels)
 			m.Get("/milestones", repo.Milestones)
 		}, context.RepoRef(), context.CheckUnit(models.UnitTypeIssues))
@@ -583,8 +585,6 @@ func RegisterRoutes(m *macaron.Macaron) {
 			m.Get("/files", context.RepoRef(), repo.SetEditorconfigIfExists, repo.SetDiffViewStyle, repo.ViewPullFiles)
 			m.Post("/merge", reqRepoWriter, repo.MergePullRequest)
 		}, repo.MustAllowPulls, context.CheckUnit(models.UnitTypePullRequests))
-
-		m.Get("/reviews", repo.Reviews)
 
 		m.Group("", func() {
 			m.Get("/src/*", repo.SetEditorconfigIfExists, repo.Home)
