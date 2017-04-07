@@ -16,7 +16,7 @@ type CommitStatus struct {
 	Index       int64  `xorm:"INDEX UNIQUE(repo_sha_index)"`
 	RepoID      int64  `xorm:"INDEX UNIQUE(repo_sha_index)"`
 	State       string `xorm:"TEXT NOT NULL"`
-	SHA         string `xorm:"TEXT NOT NULL INDEX UNIQUE(repo_sha_index)"`
+	SHA         string `xorm:"VARCHAR(40) NOT NULL INDEX UNIQUE(repo_sha_index)"`
 	TargetURL   string `xorm:"TEXT"`
 	Description string `xorm:"TEXT"`
 	Context     string `xorm:"TEXT"`
