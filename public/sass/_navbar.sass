@@ -1,0 +1,19 @@
+.navbar.has-shadow
+    border-bottom: 1px solid #ddd;
+
+.navbar-item, .navbar-link
+    padding: 0 0.8rem
+    margin: 0.5rem 0.2rem
+    border-radius: $radius-large
+
+.navbar-item
+    >.navbar-link
+        padding: 0 2em 0 0
+        margin: 0
+
+.navbar-link
+    padding-right: 2em
+
+.navbar-item.has-dropdown.is-active.tooltip
+    &::after, &::before
+        display: none

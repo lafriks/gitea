@@ -74,7 +74,6 @@
 {{end}}
 
 	<!-- Stylesheet -->
-	<link rel="stylesheet" href="{{AppSubUrl}}/vendor/plugins/semantic/semantic.min.css">
 	<link rel="stylesheet" href="{{AppSubUrl}}/css/index.css?v={{MD5 AppVer}}">
 	<noscript>
 		<style>
@@ -123,138 +122,119 @@
 {{end}}
 </head>
 <body>
-	<div class="full height">
-		<noscript>{{.i18n.Tr "enable_javascript"}}</noscript>
+	<noscript>{{.i18n.Tr "enable_javascript"}}</noscript>
+	<div class="site">{{/* Site container is needed only to support IE10+ */}}
+		<div class="page">
+			{{if not .PageIsInstall}}
+			<nav class="navbar has-shadow is-fixed-top" role="navigation" aria-label="main navigation">
+				<div class="container">
+					<div class="navbar-brand">
+						<a class="navbar-item" href="{{AppSubUrl}}/">
+							<img src="{{AppSubUrl}}/img/gitea-sm.png">
+						</a>
+						<div class="navbar-burger burger" data-target="navMenuMain">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<div id="navMenuMain" class="navbar-menu">
+						<div class="navbar-start">
+							{{if .IsSigned}}
+								<a class="navbar-item{{if .PageIsDashboard}} is-active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
+								<a class="navbar-item{{if .PageIsIssues}} is-active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
+								<a class="navbar-item{{if .PageIsPulls}} is-active{{end}}" href="{{AppSubUrl}}/pulls">{{.i18n.Tr "pull_requests"}}</a>
+							{{else}}
+								<a class="navbar-item{{if .PageIsHome}} is-active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
+							{{end}}
 
-		{{if not .PageIsInstall}}
-			<div class="following bar light">
-				<div class="ui container">
-					<div class="ui grid">
-						<div class="column">
-							<div class="ui top secondary menu">
-								<a class="item brand" href="{{AppSubUrl}}/">
-									<img class="ui mini image" src="{{AppSubUrl}}/img/gitea-sm.png">
+							<a class="navbar-item{{if .PageIsExplore}} is-active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>
+							{{/*<div class="searchbox">
+								<input class="input" type="text" placeholder="{{.i18n.Tr "search_project"}}">
+								<i class="search icon"></i>
+								</div>*/}}
+						</div>
+						<div class="navbar-end">
+							{{if .IsSigned}}
+								<a class="navbar-item tooltip is-tooltip-bottom" href="{{AppSubUrl}}/notifications" data-tooltip="{{.i18n.Tr "notifications"}}">
+									<i class="octicon octicon-inbox{{if .NotificationUnreadCount}} badge is-badge-danger{{end}}" data-badge="{{.NotificationUnreadCount}}"></i>
+									<span class="is-hidden-desktop">{{.i18n.Tr "notifications"}}</span>
 								</a>
 
-								{{if .IsSigned}}
-									<a class="item{{if .PageIsDashboard}} active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
-									<a class="item{{if .PageIsIssues}} active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
-									<a class="item{{if .PageIsPulls}} active{{end}}" href="{{AppSubUrl}}/pulls">{{.i18n.Tr "pull_requests"}}</a>
-								{{else}}
-									<a class="item{{if .PageIsHome}} active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
-								{{end}}
-
-								<a class="item{{if .PageIsExplore}} active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>
-								{{/*<div class="item">
-									<div class="ui icon input">
-									<input class="searchbox" type="text" placeholder="{{.i18n.Tr "search_project"}}">
-									<i class="search icon"></i>
-									</div>
-									</div>*/}}
-
-								{{if .IsSigned}}
-									<div class="right menu">
-										<a href="{{AppSubUrl}}/notifications" class="ui head link jump item poping up" data-content='{{.i18n.Tr "notifications"}}' data-variation="tiny inverted">
-											<span class="text">
-												<i class="octicon octicon-inbox"><span class="sr-only">{{.i18n.Tr "notifications"}}</span></i>
-
-												{{if .NotificationUnreadCount}}
-													<span class="ui red label">
-														{{.NotificationUnreadCount}}
-													</span>
-												{{end}}
-											</span>
+								<div class="navbar-item has-dropdown tooltip is-tooltip-bottom" data-tooltip="{{.i18n.Tr "create_new"}}">
+									<a class="navbar-link is-hidden-touch">
+										<i class="icon octicon octicon-plus"></i>
+									</a>
+									<div class="navbar-dropdown is-boxed">
+										<a class="navbar-item" href="{{AppSubUrl}}/repo/create">
+											<i class="icon octicon octicon-plus"></i> {{.i18n.Tr "new_repo"}}
 										</a>
+										<a class="navbar-item" href="{{AppSubUrl}}/repo/migrate">
+											<i class="icon octicon octicon-repo-clone"></i> {{.i18n.Tr "new_migrate"}}
+										</a>
+										{{if .SignedUser.CanCreateOrganization}}
+										<a class="navbar-item" href="{{AppSubUrl}}/org/create">
+											<i class="icon octicon octicon-organization"></i> {{.i18n.Tr "new_org"}}
+										</a>
+										{{end}}
+									</div><!-- end create new dropdown menu -->
+								</div>
 
-										<div class="ui dropdown head link jump item poping up" data-content="{{.i18n.Tr "create_new"}}" data-variation="tiny inverted">
-											<span class="text">
-												<i class="octicon octicon-plus"><span class="sr-only">{{.i18n.Tr "create_new"}}</span></i>
-												<i class="octicon octicon-triangle-down"></i>
-											</span>
-											<div class="menu">
-												<a class="item" href="{{AppSubUrl}}/repo/create">
-													<i class="octicon octicon-plus"></i> {{.i18n.Tr "new_repo"}}
-												</a>
-												<a class="item" href="{{AppSubUrl}}/repo/migrate">
-													<i class="octicon octicon-repo-clone"></i> {{.i18n.Tr "new_migrate"}}
-												</a>
-												{{if .SignedUser.CanCreateOrganization}}
-												<a class="item" href="{{AppSubUrl}}/org/create">
-													<i class="octicon octicon-organization"></i> {{.i18n.Tr "new_org"}}
-												</a>
-												{{end}}
-											</div><!-- end content create new menu -->
-										</div><!-- end dropdown menu create new -->
+								<div class="navbar-item has-dropdown tooltip is-tooltip-bottom" data-tooltip="{{.i18n.Tr "user_profile_and_more"}}">
+									<a class="navbar-link is-hidden-touch">
+										<figure class="image is-32x32">
+											<img src="{{.SignedUser.RelAvatarLink}}">
+										</figure>
+									</a>
+									<div class="navbar-dropdown is-boxed is-right">
+										<div class="navbar-item has-text-centered is-uppercase is-size-7">
+											{{.i18n.Tr "signed_in_as"}}
+											&nbsp;<strong>{{.SignedUser.Name}}</strong>
+										</div>
 
-										<div class="ui dropdown head link jump item poping up" tabindex="-1" data-content="{{.i18n.Tr "user_profile_and_more"}}" data-variation="tiny inverted">
-											<span class="text avatar">
-												<img class="ui small rounded image" src="{{.SignedUser.RelAvatarLink}}">
-												<span class="sr-only">{{.i18n.Tr "user_profile_and_more"}}</span>
-												<i class="octicon octicon-triangle-down" tabindex="-1"></i>
-											</span>
-											<div class="menu" tabindex="-1">
-												<div class="ui header">
-													{{.i18n.Tr "signed_in_as"}} <strong>{{.SignedUser.Name}}</strong>
-												</div>
+										<hr class="navbar-divider">
+										<a class="navbar-item" href="{{AppSubUrl}}/{{.SignedUser.Name}}">
+											<i class="icon octicon octicon-person"></i> {{.i18n.Tr "your_profile"}}
+										</a>
+										<a class="navbar-item" href="{{AppSubUrl}}/{{.SignedUser.Name}}?tab=stars">
+											<i class="icon octicon octicon-star"></i> {{.i18n.Tr "your_starred"}}
+										</a>
+										<a class="navbar-item{{if .PageIsUserSettings}} is-active{{end}}" href="{{AppSubUrl}}/user/settings">
+											<i class="icon octicon octicon-settings"></i> {{.i18n.Tr "your_settings"}}
+										</a>
+										<a class="navbar-item" target="_blank" rel="noopener noreferrer" href="https://docs.gitea.io">
+											<i class="icon octicon octicon-question"></i> {{.i18n.Tr "help"}}
+										</a>
+										{{if .IsAdmin}}
+											<hr class="navbar-divider">
 
-												<div class="divider"></div>
-												<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}">
-													<i class="octicon octicon-person"></i>
-													{{.i18n.Tr "your_profile"}}<!-- Your profile -->
-												</a>
-												<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}?tab=stars">
-													<i class="octicon octicon-star"></i>
-													{{.i18n.Tr "your_starred"}}
-												</a>
-												<a class="{{if .PageIsUserSettings}}active{{end}} item" href="{{AppSubUrl}}/user/settings">
-													<i class="octicon octicon-settings"></i>
-													{{.i18n.Tr "your_settings"}}<!-- Your settings -->
-												</a>
-												<a class="item" target="_blank" rel="noopener noreferrer" href="https://docs.gitea.io">
-													<i class="octicon octicon-question"></i>
-													{{.i18n.Tr "help"}}<!-- Help -->
-												</a>
-												{{if .IsAdmin}}
-													<div class="divider"></div>
-
-													<a class="{{if .PageIsAdmin}}active{{end}} item" href="{{AppSubUrl}}/admin">
-														<i class="icon settings"></i>
-														{{.i18n.Tr "admin_panel"}}<!-- Admin Panel -->
-													</a>
-												{{end}}
-
-												<div class="divider"></div>
-												<a class="item" href="{{AppSubUrl}}/user/logout">
-													<i class="octicon octicon-sign-out"></i>
-													{{.i18n.Tr "sign_out"}}<!-- Sign Out -->
-												</a>
-											</div><!-- end content avatar menu -->
-										</div><!-- end dropdown avatar menu -->
-									</div><!-- end signed user right menu -->
-
-								{{else}}
-
-									<a class="item" target="_blank" rel="noopener noreferrer" href="https://docs.gitea.io">{{.i18n.Tr "help"}}</a>
-									<div class="right menu">
-										{{if .ShowRegistrationButton}}
-											<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
-												<i class="octicon octicon-person"></i> {{.i18n.Tr "register"}}
+											<a class="navbar-item{{if .PageIsAdmin}} is-active{{end}}" href="{{AppSubUrl}}/admin">
+												<i class="icon fa fa-cogs"></i> {{.i18n.Tr "admin_panel"}}
 											</a>
 										{{end}}
-										<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login?redirect_to={{.Link}}">
-											<i class="octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
-										</a>
-									</div><!-- end anonymous right menu -->
 
+										<hr class="navbar-divider">
+										<a class="navbar-item" href="{{AppSubUrl}}/user/logout">
+											<i class="icon octicon octicon-sign-out"></i> {{.i18n.Tr "sign_out"}}
+										</a>
+									</div><!-- end avatar dropdown menu -->
+								</div>
+							{{else}}
+
+								<a class="navbar-item" target="_blank" rel="noopener noreferrer" href="https://docs.gitea.io">{{.i18n.Tr "help"}}</a>
+								{{if .ShowRegistrationButton}}
+									<a class="navbar-item{{if .PageIsSignUp}} is-active{{end}}" href="{{AppSubUrl}}/user/sign_up">
+										<i class="octicon octicon-person"></i> {{.i18n.Tr "register"}}
+									</a>
 								{{end}}
-							</div><!-- end top menu -->
-						</div><!-- end column -->
-					</div><!-- end grid -->
-				</div><!-- end container -->
-			</div><!-- end bar -->
-		{{end}}
-{{/*
-	</div>
-</body>
-</html>
-*/}}
+								<a class="navbar-item{{if .PageIsSignIn}} is-active{{end}}" href="{{AppSubUrl}}/user/login?redirect_to={{.Link}}">
+									<i class="octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
+								</a>
+
+							{{end}}
+						</div><!-- navbar end -->
+					</div><!-- navbar menu -->
+				</div><!-- container -->
+			</nav>
+			{{end}}
+			<div class="container">

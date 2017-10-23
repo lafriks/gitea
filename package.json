@@ -1,7 +1,9 @@
 {
     "license": "MIT",
     "devDependencies": {
-        "less": "^2.7.2",
-        "less-plugin-clean-css": "^1.5.1"
+        "node-sass": "^4.5.3",
+        "bulma": "^0.6.0",
+        "bulma-tooltip": "^0.0.4",
+        "bulma-badge": "^0.0.3"
     }
 }

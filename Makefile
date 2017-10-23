@@ -299,7 +299,7 @@ stylesheets-check: generate-stylesheets
 
 .PHONY: generate-stylesheets
 generate-stylesheets:
-	node_modules/.bin/lessc --no-ie-compat --clean-css public/less/index.less public/css/index.css
+	node_modules/.bin/node-sass public/sass/index.sass public/css/index.css --output-style compressed
 
 .PHONY: swagger-ui
 swagger-ui:
