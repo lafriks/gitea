@@ -60,6 +60,7 @@ type Issue struct {
 
 	Attachments []*Attachment `xorm:"-"`
 	Comments    []*Comment    `xorm:"-"`
+	Reactions   []*Reaction   `xorm:"-"`
 }
 
 // BeforeUpdate is invoked from XORM before updating this object.
@@ -161,6 +162,16 @@ func (issue *Issue) loadComments(e Engine) (err error) {
 	return err
 }
 
+func (issue *Issue) loadReactions(e Engine) (err error) {
+	if issue.Reactions != nil {
+		return nil
+	}
+	issue.Reactions, err = findReactions(e, FindReactionsOptions{
+		IssueID: issue.ID,
+	})
+	return err
+}
+
 func (issue *Issue) loadAttributes(e Engine) (err error) {
 	if err = issue.loadRepo(e); err != nil {
 		return
@@ -198,7 +209,11 @@ func (issue *Issue) loadAttributes(e Engine) (err error) {
 	}
 
 	if err = issue.loadComments(e); err != nil {
-		return
+		return err
+	}
+
+	if err = issue.loadReactions(e); err != nil {
+		return err
 	}
 
 	return nil
@@ -806,6 +821,20 @@ func (issue *Issue) ChangeAssignee(doer *User, assigneeID int64) (err error) {
 	}
 	go HookQueue.Add(issue.RepoID)
 	return nil
+}
+
+// GetReactionsByType returns issue reactions grouped by type
+func (issue *Issue) GetReactionsByType() map[string]ReactionList {
+	var reactions = make(map[string]ReactionList)
+	for _, reaction := range issue.Reactions {
+		list, ok := reactions[reaction.Type]
+		if !ok {
+			list = make(ReactionList, 0)
+		}
+		list = append(list, reaction)
+		reactions[reaction.Type] = list
+	}
+	return reactions
 }
 
 // NewIssueOptions represents the options of a new issue.

@@ -1256,3 +1256,39 @@ func DeleteMilestone(ctx *context.Context) {
 		"redirect": ctx.Repo.RepoLink + "/milestones",
 	})
 }
+
+// ChangeIssueReaction create a reaction for issue
+func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
+	issue := GetActionIssue(ctx)
+	if ctx.Written() {
+		return
+	}
+
+	if ctx.HasError() {
+		ctx.Handle(500, "AddIssueReaction", fmt.Errorf(ctx.GetErrMsg()))
+		return
+	}
+	switch ctx.Params(":action") {
+	case "react":
+		reaction, err := models.CreateIssueReaction(ctx.User, issue, form.Content)
+		if err != nil {
+			ctx.Handle(500, "CreateIssueReaction", err)
+			return
+		}
+
+		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
+	case "unreact":
+		//reaction, err := models.RemoveIssueReaction(ctx.User, issue, form.Content)
+		//if err != nil {
+		//	ctx.Handle(500, "CreateIssueReaction", err)
+		//	return
+		//}
+
+		//log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
+	default:
+		ctx.Handle(404, fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+	}
+	ctx.JSON(200, map[string]interface{}{
+		"ok": true,
+	})
+}

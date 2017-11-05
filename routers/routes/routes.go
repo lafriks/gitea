@@ -495,6 +495,7 @@ func RegisterRoutes(m *macaron.Macaron) {
 						m.Post("/cancel", repo.CancelStopwatch)
 					})
 				})
+				m.Post("/reactions/:action", bindIgnErr(auth.ReactionForm{}), repo.ChangeIssueReaction)
 			})
 
 			m.Post("/labels", reqRepoWriter, repo.UpdateIssueLabel)

@@ -117,6 +117,26 @@ function updateIssuesMeta(url, action, issueIds, elementId, afterSuccess) {
     })
 }
 
+function initReactionSelector(parent) {
+    var container = (parent ? parent + ' ' : '');
+    $(container + '.select-reaction > .menu > .item').on('click', function(e){
+        e.preventDefault();
+        var url = $(this).closest('.select-reaction').data('action-url')
+            + '/' + ($(this).hasClass('is-active') ? 'unreact' : 'react');
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                "_csrf": csrf,
+                "content": $(this).data('content')
+            },
+            success: function() {
+                console.log(arguments);
+            }
+        });
+    });
+}
+
 function initCommentForm() {
     if ($('.comment.form').length == 0) {
         return
@@ -594,6 +614,7 @@ function initRepository() {
             $('#status').val($statusButton.data('status-val'));
             $('#comment-form').submit();
         });
+        initReactionSelector();
     }
 
     // Diff
