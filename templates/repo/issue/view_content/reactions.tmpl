@@ -1,6 +1,6 @@
 {{if .Reactions}}
 	{{range $key, $value := .Reactions}}
-		<a class="ui label basic{{if $value.HasUser $.SignedUserID}} blue{{end}} has-emoji">
+		<a class="ui label basic{{if $value.HasUser $.ctx.SignedUserID}} blue{{end}} has-emoji">
 			{{if eq $key "hooray"}}
 				:tada:
 			{{else}}
@@ -20,7 +20,7 @@
 		<i class="octicon octicon-smiley"></i>
 	</a>
 	<div class="menu has-emoji">
-		<div class="header">{{ .i18n.Tr "repo.pick_reaction"}}</div>
+		<div class="header">{{ .ctx.i18n.Tr "repo.pick_reaction"}}</div>
 		<div class="divider"></div>
 		<div class="item" data-content="+1">:+1:</div>
 		<div class="item" data-content="-1">:-1:</div>

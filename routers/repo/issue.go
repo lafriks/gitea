@@ -39,6 +39,8 @@ const (
 	tplMilestoneNew  base.TplName = "repo/issue/milestone_new"
 	tplMilestoneEdit base.TplName = "repo/issue/milestone_edit"
 
+	tplReactions base.TplName = "repo/issue/view_content/reactions"
+
 	issueTemplateKey = "IssueTemplate"
 )
 
@@ -1265,15 +1267,16 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 	}
 
 	if ctx.HasError() {
-		ctx.Handle(500, "AddIssueReaction", fmt.Errorf(ctx.GetErrMsg()))
+		ctx.Handle(500, "AddIssueReaction", errors.New(ctx.GetErrMsg()))
 		return
 	}
+
 	switch ctx.Params(":action") {
 	case "react":
 		reaction, err := models.CreateIssueReaction(ctx.User, issue, form.Content)
 		if err != nil {
-			ctx.Handle(500, "CreateIssueReaction", err)
-			return
+			log.Info("CreateIssueReaction: %s", err)
+			break
 		}
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
@@ -1287,8 +1290,19 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 		//log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	default:
 		ctx.Handle(404, fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	html, err := ctx.HTMLString(string(tplReactions), map[string]interface{}{
+		"ctx":       ctx.Data,
+		"ActionURL": fmt.Sprintf("%s/issues/%d/reactions", ctx.Repo.RepoLink, issue.Index),
+		"Reactions": issue.GetReactionsByType(),
+	})
+	if err != nil {
+		ctx.Handle(500, "ChangeIssueReaction.HTMLString", err)
+		return
 	}
 	ctx.JSON(200, map[string]interface{}{
-		"ok": true,
+		"html": html,
 	})
 }

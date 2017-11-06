@@ -19,7 +19,7 @@
 					<div class="ui top attached header">
 						<span class="text grey"><a {{if gt .Issue.Poster.ID 0}}href="{{.Issue.Poster.HomeLink}}"{{end}}>{{.Issue.Poster.Name}}</a> {{.i18n.Tr "repo.issues.commented_at" .Issue.HashTag $createdStr | Safe}}</span>
 						<div class="ui right actions">
-							{{template "repo/issue/view_content/reactions" Dict "i18n" $.i18n "ActionURL" (Printf "%s/issues/%d/reactions" $.RepoLink .Issue.Index) "Reactions" .GetReactionsByType "SignedUserID" $.SignedUserID }}
+							{{template "repo/issue/view_content/reactions" Dict "ctx" $ "ActionURL" (Printf "%s/issues/%d/reactions" $.RepoLink .Issue.Index) "Reactions" .GetReactionsByType }}
 							{{if .IsIssueOwner}}
 								<div class="item action">
 									<a class="edit-content" href="#"><i class="octicon octicon-pencil"></i></a>
@@ -41,7 +41,7 @@
 					{{$reactions := .Issue.GetReactionsByType}}
 					{{if $reactions}}
 						<div class="ui attached segment reactions">
-							{{template "repo/issue/view_content/reactions" Dict "i18n" $.i18n "ActionURL" (Printf "%s/issues/%d/reactions" $.RepoLink .Issue.Index) "Reactions" $reactions "SignedUserID" $.SignedUserID }}
+							{{template "repo/issue/view_content/reactions" Dict "ctx" $ "ActionURL" (Printf "%s/issues/%d/reactions" $.RepoLink .Issue.Index) "Reactions" $reactions }}
 						</div>
 					{{end}}
 					{{if .Issue.Attachments}}

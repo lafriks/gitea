@@ -129,10 +129,9 @@ function initReactionSelector(parent) {
             data: {
                 "_csrf": csrf,
                 "content": $(this).data('content')
-            },
-            success: function() {
-                console.log(arguments);
             }
+        }).done(function(resp) {
+            console.log(resp.html);
         });
     });
 }

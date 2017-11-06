@@ -22,7 +22,7 @@
 								{{end}}
 							</div>
 						{{end}}
-						{{template "repo/issue/view_content/reactions" Dict "i18n" $.i18n "ActionURL" (Printf "%s/issues/%d/comment/%d/reactions" $.RepoLink $.Issue.Index .ID) "Reactions" .GetReactionsByType "SignedUserID" $.SignedUserID }}
+						{{template "repo/issue/view_content/reactions" Dict "ctx" $ "ActionURL" (Printf "%s/issues/%d/comment/%d/reactions" $.RepoLink $.Issue.Index .ID) "Reactions" .GetReactionsByType }}
 						{{if or $.IsRepositoryAdmin (eq .Poster.ID $.SignedUserID)}}
 							<div class="item action">
 								<a class="edit-content" href="#"><i class="octicon octicon-pencil"></i></a>
