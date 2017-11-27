@@ -288,16 +288,27 @@ func (c *Comment) MailParticipants(e Engine, opType ActionType, issue *Issue) (e
 	return nil
 }
 
+func (c *Comment) loadReactions(e Engine) (err error) {
+	if c.Reactions != nil {
+		return nil
+	}
+	c.Reactions, err = findReactions(e, FindReactionsOptions{
+		IssueID:   c.IssueID,
+		CommentID: c.ID,
+	})
+	return err
+}
+
+// LoadReactions loads comment reactions
+func (c *Comment) LoadReactions() error {
+	return c.loadReactions(x)
+}
+
 // GetReactionsByType returns comment reactions grouped by type
 func (c *Comment) GetReactionsByType() map[string]ReactionList {
 	var reactions = make(map[string]ReactionList)
 	for _, reaction := range c.Reactions {
-		list, ok := reactions[reaction.Type]
-		if !ok {
-			list = make(ReactionList, 0)
-		}
-		list = append(list, reaction)
-		reactions[reaction.Type] = list
+		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
 	}
 	return reactions
 }

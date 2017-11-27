@@ -725,9 +725,8 @@ func GetActionIssue(ctx *context.Context) *models.Issue {
 		ctx.NotFoundOrServerError("GetIssueByIndex", models.IsErrIssueNotExist, err)
 		return nil
 	}
-	if issue.IsPull && !ctx.Repo.Repository.UnitEnabled(models.UnitTypePullRequests) ||
-		!issue.IsPull && !ctx.Repo.Repository.UnitEnabled(models.UnitTypeIssues) {
-		ctx.Handle(404, "IssueOrPullRequestUnitNotAllowed", nil)
+	checkIssueRights(ctx, issue)
+	if ctx.Written() {
 		return nil
 	}
 	if err = issue.LoadAttributes(); err != nil {
@@ -735,6 +734,13 @@ func GetActionIssue(ctx *context.Context) *models.Issue {
 		return nil
 	}
 	return issue
+}
+
+func checkIssueRights(ctx *context.Context, issue *models.Issue) {
+	if issue.IsPull && !ctx.Repo.Repository.UnitEnabled(models.UnitTypePullRequests) ||
+		!issue.IsPull && !ctx.Repo.Repository.UnitEnabled(models.UnitTypeIssues) {
+		ctx.Handle(404, "IssueOrPullRequestUnitNotAllowed", nil)
+	}
 }
 
 func getActionIssues(ctx *context.Context) []*models.Issue {
@@ -1278,6 +1284,12 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 			log.Info("CreateIssueReaction: %s", err)
 			break
 		}
+		// Reload new reactions
+		issue.Reactions = nil
+		if err = issue.LoadAttributes(); err != nil {
+			log.Info("issue.LoadAttributes: %s", err)
+			break
+		}
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	case "unreact":
@@ -1287,10 +1299,23 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 		//	return
 		//}
 
-		//log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
+		// Reload new reactions
+		issue.Reactions = nil
+		if err := issue.LoadAttributes(); err != nil {
+			log.Info("issue.LoadAttributes: %s", err)
+			break
+		}
+		log.Trace("Reaction for issue removed: %d/%d", ctx.Repo.Repository.ID, issue.ID)
 	default:
 		ctx.Handle(404, fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
 		return
+	}
+
+	if len(issue.Reactions) == 0 {
+		ctx.JSON(200, map[string]interface{}{
+			"empty": true,
+			"html":  "",
+		})
 	}
 
 	html, err := ctx.HTMLString(string(tplReactions), map[string]interface{}{
@@ -1300,6 +1325,80 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 	})
 	if err != nil {
 		ctx.Handle(500, "ChangeIssueReaction.HTMLString", err)
+		return
+	}
+	ctx.JSON(200, map[string]interface{}{
+		"html": html,
+	})
+}
+
+// ChangeCommentReaction create a reaction for comment
+func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
+	comment, err := models.GetCommentByID(ctx.ParamsInt64(":id"))
+	if err != nil {
+		ctx.NotFoundOrServerError("GetCommentByID", models.IsErrCommentNotExist, err)
+		return
+	}
+
+	issue, err := models.GetIssueByID(comment.IssueID)
+	checkIssueRights(ctx, issue)
+	if ctx.Written() {
+		return
+	}
+
+	if ctx.HasError() {
+		ctx.Handle(500, "AddCommentReaction", errors.New(ctx.GetErrMsg()))
+		return
+	}
+
+	switch ctx.Params(":action") {
+	case "react":
+		reaction, err := models.CreateCommentReaction(ctx.User, issue, comment, form.Content)
+		if err != nil {
+			log.Info("CreateCommentReaction: %s", err)
+			break
+		}
+		// Reload new reactions
+		comment.Reactions = nil
+		if err = comment.LoadReactions(); err != nil {
+			log.Info("comment.LoadAttributes: %s", err)
+			break
+		}
+
+		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, issue.ID, comment.ID, reaction.ID)
+	case "unreact":
+		//reaction, err := models.RemoveIssueReaction(ctx.User, issue, form.Content)
+		//if err != nil {
+		//	ctx.Handle(500, "CreateIssueReaction", err)
+		//	return
+		//}
+		// Reload new reactions
+		comment.Reactions = nil
+		if err = comment.LoadReactions(); err != nil {
+			log.Info("comment.LoadAttributes: %s", err)
+			break
+		}
+
+		log.Trace("Reaction for comment removed: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, comment.ID)
+	default:
+		ctx.Handle(404, fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	if len(comment.Reactions) == 0 {
+		ctx.JSON(200, map[string]interface{}{
+			"empty": true,
+			"html":  "",
+		})
+	}
+
+	html, err := ctx.HTMLString(string(tplReactions), map[string]interface{}{
+		"ctx":       ctx.Data,
+		"ActionURL": fmt.Sprintf("%s/comments/%d/reactions", ctx.Repo.RepoLink, comment.ID),
+		"Reactions": comment.GetReactionsByType(),
+	})
+	if err != nil {
+		ctx.Handle(500, "ChangeCommentReaction.HTMLString", err)
 		return
 	}
 	ctx.JSON(200, map[string]interface{}{

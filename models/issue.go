@@ -166,10 +166,26 @@ func (issue *Issue) loadReactions(e Engine) (err error) {
 	if issue.Reactions != nil {
 		return nil
 	}
-	issue.Reactions, err = findReactions(e, FindReactionsOptions{
+	reactions, err := findReactions(e, FindReactionsOptions{
 		IssueID: issue.ID,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	// Cache comments to map
+	comments := make(map[int64]*Comment)
+	for _, comment := range issue.Comments {
+		comments[comment.ID] = comment
+	}
+	// Add reactions either to issue or comment
+	for _, react := range reactions {
+		if react.CommentID == 0 {
+			issue.Reactions = append(issue.Reactions, react)
+		} else if comment, ok := comments[react.CommentID]; ok {
+			comment.Reactions = append(comment.Reactions, react)
+		}
+	}
+	return nil
 }
 
 func (issue *Issue) loadAttributes(e Engine) (err error) {
@@ -827,12 +843,7 @@ func (issue *Issue) ChangeAssignee(doer *User, assigneeID int64) (err error) {
 func (issue *Issue) GetReactionsByType() map[string]ReactionList {
 	var reactions = make(map[string]ReactionList)
 	for _, reaction := range issue.Reactions {
-		list, ok := reactions[reaction.Type]
-		if !ok {
-			list = make(ReactionList, 0)
-		}
-		list = append(list, reaction)
-		reactions[reaction.Type] = list
+		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
 	}
 	return reactions
 }
