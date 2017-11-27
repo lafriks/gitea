@@ -5,8 +5,6 @@
 package models
 
 import (
-	//"fmt"
-	//"fmt"
 	"time"
 
 	"github.com/go-xorm/builder"
