@@ -55,7 +55,7 @@ func findReactions(e Engine, opts FindReactionsOptions) ([]*Reaction, error) {
 		Find(&reactions)
 }
 
-func createReaction(e *xorm.Session, opts *CreateReactionOptions) (*Reaction, error) {
+func createReaction(e *xorm.Session, opts *ReactionOptions) (*Reaction, error) {
 	reaction := &Reaction{
 		Type:    opts.Type,
 		UserID:  opts.Doer.ID,
@@ -71,8 +71,8 @@ func createReaction(e *xorm.Session, opts *CreateReactionOptions) (*Reaction, er
 	return reaction, nil
 }
 
-// CreateReactionOptions defines options for creating reactions
-type CreateReactionOptions struct {
+// ReactionOptions defines options for creating or deleting reactions
+type ReactionOptions struct {
 	Type    string
 	Doer    *User
 	Issue   *Issue
@@ -80,7 +80,7 @@ type CreateReactionOptions struct {
 }
 
 // CreateReaction creates reaction for issue or comment.
-func CreateReaction(opts *CreateReactionOptions) (reaction *Reaction, err error) {
+func CreateReaction(opts *ReactionOptions) (reaction *Reaction, err error) {
 	sess := x.NewSession()
 	defer sess.Close()
 	if err = sess.Begin(); err != nil {
@@ -100,7 +100,7 @@ func CreateReaction(opts *CreateReactionOptions) (reaction *Reaction, err error)
 
 // CreateIssueReaction creates a reaction on issue.
 func CreateIssueReaction(doer *User, issue *Issue, content string) (*Reaction, error) {
-	return CreateReaction(&CreateReactionOptions{
+	return CreateReaction(&ReactionOptions{
 		Type:  content,
 		Doer:  doer,
 		Issue: issue,
@@ -109,7 +109,54 @@ func CreateIssueReaction(doer *User, issue *Issue, content string) (*Reaction, e
 
 // CreateCommentReaction creates a reaction on comment.
 func CreateCommentReaction(doer *User, issue *Issue, comment *Comment, content string) (*Reaction, error) {
-	return CreateReaction(&CreateReactionOptions{
+	return CreateReaction(&ReactionOptions{
+		Type:    content,
+		Doer:    doer,
+		Issue:   issue,
+		Comment: comment,
+	})
+}
+
+func deleteReaction(e *xorm.Session, opts *ReactionOptions) error {
+	reaction := &Reaction{
+		Type:    opts.Type,
+		UserID:  opts.Doer.ID,
+		IssueID: opts.Issue.ID,
+	}
+	if opts.Comment != nil {
+		reaction.CommentID = opts.Comment.ID
+	}
+	_, err := e.Delete(reaction)
+	return err
+}
+
+// DeleteReaction deletes reaction for issue or comment.
+func DeleteReaction(opts *ReactionOptions) error {
+	sess := x.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if err := deleteReaction(sess, opts); err != nil {
+		return err
+	}
+
+	return sess.Commit()
+}
+
+// DeleteIssueReaction deletes a reaction on issue.
+func DeleteIssueReaction(doer *User, issue *Issue, content string) error {
+	return DeleteReaction(&ReactionOptions{
+		Type:  content,
+		Doer:  doer,
+		Issue: issue,
+	})
+}
+
+// DeleteCommentReaction deletes a reaction on comment.
+func DeleteCommentReaction(doer *User, issue *Issue, comment *Comment, content string) error {
+	return DeleteReaction(&ReactionOptions{
 		Type:    content,
 		Doer:    doer,
 		Issue:   issue,

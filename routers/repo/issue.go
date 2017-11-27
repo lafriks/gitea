@@ -1293,11 +1293,10 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	case "unreact":
-		//reaction, err := models.RemoveIssueReaction(ctx.User, issue, form.Content)
-		//if err != nil {
-		//	ctx.Handle(500, "CreateIssueReaction", err)
-		//	return
-		//}
+		if err := models.DeleteIssueReaction(ctx.User, issue, form.Content); err != nil {
+			ctx.Handle(500, "DeleteIssueReaction", err)
+			return
+		}
 
 		// Reload new reactions
 		issue.Reactions = nil
@@ -1367,11 +1366,11 @@ func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
 
 		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, issue.ID, comment.ID, reaction.ID)
 	case "unreact":
-		//reaction, err := models.RemoveIssueReaction(ctx.User, issue, form.Content)
-		//if err != nil {
-		//	ctx.Handle(500, "CreateIssueReaction", err)
-		//	return
-		//}
+		if err := models.DeleteCommentReaction(ctx.User, issue, comment, form.Content); err != nil {
+			ctx.Handle(500, "DeleteCommentReaction", err)
+			return
+		}
+
 		// Reload new reactions
 		comment.Reactions = nil
 		if err = comment.LoadReactions(); err != nil {
