@@ -117,8 +117,10 @@ func CreateCommentReaction(doer *User, issue *Issue, comment *Comment, content s
 	})
 }
 
+// ReactionList represents list of reactions
 type ReactionList []*Reaction
 
+// HasUser check if user has reacted
 func (list ReactionList) HasUser(userID int64) bool {
 	for _, reaction := range list {
 		if reaction.UserID == userID {

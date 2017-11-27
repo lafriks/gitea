@@ -228,11 +228,7 @@ func (issue *Issue) loadAttributes(e Engine) (err error) {
 		return err
 	}
 
-	if err = issue.loadReactions(e); err != nil {
-		return err
-	}
-
-	return nil
+	return issue.loadReactions(e)
 }
 
 // LoadAttributes loads the attribute of this issue.
