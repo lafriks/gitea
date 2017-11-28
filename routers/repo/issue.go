@@ -1320,7 +1320,7 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 	html, err := ctx.HTMLString(string(tplReactions), map[string]interface{}{
 		"ctx":       ctx.Data,
 		"ActionURL": fmt.Sprintf("%s/issues/%d/reactions", ctx.Repo.RepoLink, issue.Index),
-		"Reactions": issue.GetReactionsByType(),
+		"Reactions": issue.Reactions.GroupByType(),
 	})
 	if err != nil {
 		ctx.Handle(500, "ChangeIssueReaction.HTMLString", err)
@@ -1394,7 +1394,7 @@ func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
 	html, err := ctx.HTMLString(string(tplReactions), map[string]interface{}{
 		"ctx":       ctx.Data,
 		"ActionURL": fmt.Sprintf("%s/comments/%d/reactions", ctx.Repo.RepoLink, comment.ID),
-		"Reactions": comment.GetReactionsByType(),
+		"Reactions": comment.Reactions.GroupByType(),
 	})
 	if err != nil {
 		ctx.Handle(500, "ChangeCommentReaction.HTMLString", err)

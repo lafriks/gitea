@@ -107,7 +107,7 @@ type Comment struct {
 	CommitSHA string `xorm:"VARCHAR(40)"`
 
 	Attachments []*Attachment `xorm:"-"`
-	Reactions   []*Reaction   `xorm:"-"`
+	Reactions   ReactionList  `xorm:"-"`
 
 	// For view issue page.
 	ShowTag CommentTag `xorm:"-"`
@@ -302,15 +302,6 @@ func (c *Comment) loadReactions(e Engine) (err error) {
 // LoadReactions loads comment reactions
 func (c *Comment) LoadReactions() error {
 	return c.loadReactions(x)
-}
-
-// GetReactionsByType returns comment reactions grouped by type
-func (c *Comment) GetReactionsByType() map[string]ReactionList {
-	var reactions = make(map[string]ReactionList)
-	for _, reaction := range c.Reactions {
-		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
-	}
-	return reactions
 }
 
 func createComment(e *xorm.Session, opts *CreateCommentOptions) (_ *Comment, err error) {

@@ -174,3 +174,12 @@ func (list ReactionList) HasUser(userID int64) bool {
 	}
 	return false
 }
+
+// GroupByType returns reactions grouped by type
+func (list ReactionList) GroupByType() map[string]ReactionList {
+	var reactions = make(map[string]ReactionList)
+	for _, reaction := range list {
+		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
+	}
+	return reactions
+}

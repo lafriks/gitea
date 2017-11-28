@@ -60,7 +60,7 @@ type Issue struct {
 
 	Attachments []*Attachment `xorm:"-"`
 	Comments    []*Comment    `xorm:"-"`
-	Reactions   []*Reaction   `xorm:"-"`
+	Reactions   ReactionList  `xorm:"-"`
 }
 
 // BeforeUpdate is invoked from XORM before updating this object.
@@ -833,15 +833,6 @@ func (issue *Issue) ChangeAssignee(doer *User, assigneeID int64) (err error) {
 	}
 	go HookQueue.Add(issue.RepoID)
 	return nil
-}
-
-// GetReactionsByType returns issue reactions grouped by type
-func (issue *Issue) GetReactionsByType() map[string]ReactionList {
-	var reactions = make(map[string]ReactionList)
-	for _, reaction := range issue.Reactions {
-		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
-	}
-	return reactions
 }
 
 // NewIssueOptions represents the options of a new issue.
