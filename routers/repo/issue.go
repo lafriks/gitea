@@ -1276,7 +1276,7 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 	}
 
 	if ctx.HasError() {
-		ctx.Handle(500, "AddIssueReaction", errors.New(ctx.GetErrMsg()))
+		ctx.Handle(500, "ChangeIssueReaction", errors.New(ctx.GetErrMsg()))
 		return
 	}
 
@@ -1307,6 +1307,7 @@ func ChangeIssueReaction(ctx *context.Context, form auth.ReactionForm) {
 			log.Info("issue.LoadAttributes: %s", err)
 			break
 		}
+
 		log.Trace("Reaction for issue removed: %d/%d", ctx.Repo.Repository.ID, issue.ID)
 	default:
 		ctx.Handle(404, fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
@@ -1349,7 +1350,7 @@ func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
 	}
 
 	if ctx.HasError() {
-		ctx.Handle(500, "AddCommentReaction", errors.New(ctx.GetErrMsg()))
+		ctx.Handle(500, "ChangeCommentReaction", errors.New(ctx.GetErrMsg()))
 		return
 	}
 
@@ -1366,6 +1367,10 @@ func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
 			log.Info("comment.LoadAttributes: %s", err)
 			break
 		}
+		if _, err = comment.Reactions.LoadUsers(); err != nil {
+			log.Info("comment.Reactions.LoadUsers: %s", err)
+			break
+		}
 
 		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, issue.ID, comment.ID, reaction.ID)
 	case "unreact":
@@ -1378,6 +1383,10 @@ func ChangeCommentReaction(ctx *context.Context, form auth.ReactionForm) {
 		comment.Reactions = nil
 		if err = comment.LoadReactions(); err != nil {
 			log.Info("comment.LoadAttributes: %s", err)
+			break
+		}
+		if _, err = comment.Reactions.LoadUsers(); err != nil {
+			log.Info("comment.Reactions.LoadUsers: %s", err)
 			break
 		}
 

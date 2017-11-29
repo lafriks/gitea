@@ -123,9 +123,15 @@ function initReactionSelector(parent) {
         parent = $(document);
         reactions = '.reactions > ';
     }
+
+    parent.find(reactions + 'a.label').popup({'position': 'bottom left', 'metadata': {'content': 'title', 'title': 'none'}});
+
     parent.find('.select-reaction > .menu > .item, ' + reactions + 'a.label').on('click', function(e){
         var vm = this;
         e.preventDefault();
+
+        if ($(this).hasClass('disabled')) return;
+
         var actionURL = $(this).hasClass('item') ?
                 $(this).closest('.select-reaction').data('action-url') :
                 $(this).data('action-url');

@@ -1,6 +1,6 @@
 {{if .Reactions}}
 	{{range $key, $value := .Reactions}}
-		<a class="ui label basic{{if $value.HasUser $.ctx.SignedUserID}} blue{{end}} has-emoji" data-content="{{ $key }}" data-action-url="{{ $.ActionURL }}">
+		<a class="ui label basic{{if $value.HasUser $.ctx.SignedUserID}} blue{{end}}{{if not $.ctx.IsSigned}} disabled{{end}} has-emoji" data-title="{{$value.GetFirstUsers}}{{if gt (len $value) 10}} {{ $.ctx.i18n.Tr "repo.reactions_more" $value.GetMoreUserCount}}{{end}}" data-content="{{ $key }}" data-action-url="{{ $.ActionURL }}">
 			{{if eq $key "hooray"}}
 				:tada:
 			{{else}}

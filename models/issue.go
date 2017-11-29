@@ -172,6 +172,11 @@ func (issue *Issue) loadReactions(e Engine) (err error) {
 	if err != nil {
 		return err
 	}
+	// Load reaction user data
+	if _, err := ReactionList(reactions).LoadUsers(); err != nil {
+		return err
+	}
+
 	// Cache comments to map
 	comments := make(map[int64]*Comment)
 	for _, comment := range issue.Comments {

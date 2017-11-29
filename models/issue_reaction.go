@@ -5,6 +5,8 @@
 package models
 
 import (
+	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/go-xorm/builder"
@@ -167,6 +169,9 @@ type ReactionList []*Reaction
 
 // HasUser check if user has reacted
 func (list ReactionList) HasUser(userID int64) bool {
+	if userID == 0 {
+		return false
+	}
 	for _, reaction := range list {
 		if reaction.UserID == userID {
 			return true
@@ -182,4 +187,62 @@ func (list ReactionList) GroupByType() map[string]ReactionList {
 		reactions[reaction.Type] = append(reactions[reaction.Type], reaction)
 	}
 	return reactions
+}
+
+func (list ReactionList) getUserIDs() []int64 {
+	userIDs := make(map[int64]struct{}, len(list))
+	for _, reaction := range list {
+		if _, ok := userIDs[reaction.UserID]; !ok {
+			userIDs[reaction.UserID] = struct{}{}
+		}
+	}
+	return keysInt64(userIDs)
+}
+
+func (list ReactionList) loadUsers(e Engine) ([]*User, error) {
+	if len(list) == 0 {
+		return nil, nil
+	}
+
+	userIDs := list.getUserIDs()
+	userMaps := make(map[int64]*User, len(userIDs))
+	err := e.
+		In("id", userIDs).
+		Find(&userMaps)
+	if err != nil {
+		return nil, fmt.Errorf("find user: %v", err)
+	}
+
+	for _, reaction := range list {
+		reaction.User = userMaps[reaction.UserID]
+	}
+	return valuesUser(userMaps), nil
+}
+
+// LoadUsers loads reactions' all users
+func (list ReactionList) LoadUsers() ([]*User, error) {
+	return list.loadUsers(x)
+}
+
+// GetFirstUsers returns first 10 reacted user display names seperated by comma
+func (list ReactionList) GetFirstUsers() string {
+	var buffer bytes.Buffer
+	var rem = 10
+	for _, reaction := range list {
+		if buffer.Len() > 0 {
+			buffer.WriteString(", ")
+		}
+		buffer.WriteString(reaction.User.DisplayName())
+		if rem--; rem == 0 {
+			break
+		}
+	}
+	return buffer.String()
+}
+
+func (list ReactionList) GetMoreUserCount() int {
+	if len(list) <= 10 {
+		return 0
+	}
+	return len(list) - 10
 }

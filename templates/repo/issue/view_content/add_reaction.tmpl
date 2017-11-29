@@ -1,3 +1,4 @@
+{{if .ctx.IsSigned}}
 <div class="item action ui pointing top right select-reaction dropdown" data-action-url="{{ .ActionURL }}">
 	<a class="add-reaction">
 		<i class="octicon octicon-plus-small" style="width: 10px"></i>
@@ -14,3 +15,4 @@
 		<div class="item" data-content="hooray">:tada:</div>
 	</div>
 </div>
+{{end}}
