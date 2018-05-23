@@ -640,10 +640,10 @@
   revision = "54653902c20e47f3417541d35435cb6d6162e28a"
 
 [[projects]]
-  branch = "master"
   name = "github.com/russross/blackfriday"
   packages = ["."]
-  revision = "11635eb403ff09dbc3a6b5a007ab5ab09151c229"
+  revision = "cadec560ec52d93835bf2f15bd794700d3a2473b"
+  version = "v2.0.0"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -871,6 +871,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "036b8c882671cf8d2c5e2fdbe53b1bdfbd39f7ebd7765bd50276c7c4ecf16687"
+  inputs-digest = "f6d7b7ea11e406b32706e78afa7f64903e5d0b4c617050d47e69462b6ff61557"
   solver-name = "gps-cdcl"
   solver-version = 1

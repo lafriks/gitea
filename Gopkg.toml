@@ -65,8 +65,8 @@ ignored = ["google.golang.org/appengine*"]
   name = "github.com/mcuadros/go-version"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/russross/blackfriday"
+  version = "2.0.0"
 
 [[constraint]]
   branch = "master"

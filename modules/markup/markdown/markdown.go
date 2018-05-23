@@ -42,15 +42,15 @@ func (r *Renderer) Link(out *bytes.Buffer, link []byte, title []byte, content []
 }
 
 // List renders markdown bullet or digit lists to HTML
-func (r *Renderer) List(out *bytes.Buffer, text func() bool, flags int) {
+func (r *Renderer) List(out *bytes.Buffer, text func() bool, flags blackfriday.ListType) {
 	marker := out.Len()
 	if out.Len() > 0 {
 		out.WriteByte('\n')
 	}
 
-	if flags&blackfriday.LIST_TYPE_DEFINITION != 0 {
+	if flags&blackfriday.ListTypeDefinition == blackfriday.ListTypeDefinition {
 		out.WriteString("<dl>")
-	} else if flags&blackfriday.LIST_TYPE_ORDERED != 0 {
+	} else if flags&blackfriday.ListTypeOrdered == blackfriday.ListTypeOrdered {
 		out.WriteString("<ol class='ui list'>")
 	} else {
 		out.WriteString("<ul class='ui list'>")
@@ -59,9 +59,9 @@ func (r *Renderer) List(out *bytes.Buffer, text func() bool, flags int) {
 		out.Truncate(marker)
 		return
 	}
-	if flags&blackfriday.LIST_TYPE_DEFINITION != 0 {
+	if flags&blackfriday.ListTypeDefinition == blackfriday.ListTypeDefinition {
 		out.WriteString("</dl>\n")
-	} else if flags&blackfriday.LIST_TYPE_ORDERED != 0 {
+	} else if flags&blackfriday.ListTypeOrdered == blackfriday.ListTypeOrdered {
 		out.WriteString("</ol>\n")
 	} else {
 		out.WriteString("</ul>\n")
@@ -69,7 +69,7 @@ func (r *Renderer) List(out *bytes.Buffer, text func() bool, flags int) {
 }
 
 // ListItem defines how list items should be processed to produce corresponding HTML elements.
-func (r *Renderer) ListItem(out *bytes.Buffer, text []byte, flags int) {
+func (r *Renderer) ListItem(out *bytes.Buffer, text []byte, flags blackfriday.ListType) {
 	// Detect procedures to draw checkboxes.
 	prefix := ""
 	if bytes.HasPrefix(text, []byte("<p>")) {
@@ -129,28 +129,26 @@ func (r *Renderer) Image(out *bytes.Buffer, link []byte, title []byte, alt []byt
 
 const (
 	blackfridayExtensions = 0 |
-		blackfriday.EXTENSION_NO_INTRA_EMPHASIS |
-		blackfriday.EXTENSION_TABLES |
-		blackfriday.EXTENSION_FENCED_CODE |
-		blackfriday.EXTENSION_STRIKETHROUGH |
-		blackfriday.EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK
+		blackfriday.NoIntraEmphasis |
+		blackfriday.Tables |
+		blackfriday.FencedCode |
+		blackfriday.Strikethrough |
+		blackfriday.NoEmptyLineBeforeBlock
 	blackfridayHTMLFlags = 0 |
-		blackfriday.HTML_SKIP_STYLE |
-		blackfriday.HTML_OMIT_CONTENTS |
-		blackfriday.HTML_USE_SMARTYPANTS
+		blackfriday.Smartypants
 )
 
 // RenderRaw renders Markdown to HTML without handling special links.
 func RenderRaw(body []byte, urlPrefix string, wikiMarkdown bool) []byte {
 	renderer := &Renderer{
-		Renderer:  blackfriday.HtmlRenderer(blackfridayHTMLFlags, "", ""),
+		Renderer:  blackfriday.HTMLRenderer(blackfridayHTMLFlags, "", ""),
 		URLPrefix: urlPrefix,
 		IsWiki:    wikiMarkdown,
 	}
 
 	exts := blackfridayExtensions
 	if setting.Markdown.EnableHardLineBreak {
-		exts |= blackfriday.EXTENSION_HARD_LINE_BREAK
+		exts |= blackfriday.HardLineBreak
 	}
 
 	body = blackfriday.Markdown(body, renderer, exts)
