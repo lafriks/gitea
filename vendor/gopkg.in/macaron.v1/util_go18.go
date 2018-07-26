@@ -1,4 +1,6 @@
-// Copyright 2014 com authors
+// +build go1.8
+
+// Copyright 2017 The Macaron Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -12,18 +14,11 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package com
+package macaron
 
-// PowInt is int type of math.Pow function.
-func PowInt(x int, y int) int {
-	if y <= 0 {
-		return 1
-	} else {
-		if y%2 == 0 {
-			sqrt := PowInt(x, y/2)
-			return sqrt * sqrt
-		} else {
-			return PowInt(x, y-1) * x
-		}
-	}
+import "net/url"
+
+// PathUnescape unescapes a path.
+func PathUnescape(s string) (string, error) {
+	return url.PathUnescape(s)
 }
