@@ -5,11 +5,13 @@
 package markup
 
 import (
+	"bytes"
+
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/markup/markdown"
 
-	"github.com/chaseadamsio/goorgeous"
+	"github.com/niklasfasching/go-org/org"
 	"github.com/russross/blackfriday"
 )
 
@@ -47,7 +49,15 @@ func Render(rawBytes []byte, urlPrefix string, metas map[string]string, isWiki b
 		URLPrefix: urlPrefix,
 		IsWiki:    isWiki,
 	}
-	result = goorgeous.Org(rawBytes, renderer)
+	// result = goorgeous.Org(rawBytes, renderer)
+	r, err := org.New().Silent().Parse(bytes.NewReader(rawBytes), "").Write(renderer)
+	if err != nil {
+		log.Error("Error rendering orgmode.Render: %v Just returning the rawBytes", err)
+		result = rawBytes
+		return
+	}
+	result = []byte(r)
+
 	return
 }
 

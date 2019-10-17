@@ -21,6 +21,7 @@ type Renderer struct {
 	blackfriday.Renderer
 	URLPrefix string
 	IsWiki    bool
+	out       *bytes.Buffer
 }
 
 var byteMailto = []byte("mailto:")
@@ -145,6 +146,7 @@ func RenderRaw(body []byte, urlPrefix string, wikiMarkdown bool) []byte {
 		Renderer:  blackfriday.HtmlRenderer(blackfridayHTMLFlags, "", ""),
 		URLPrefix: urlPrefix,
 		IsWiki:    wikiMarkdown,
+		out:       bytes.NewBuffer([]byte{}),
 	}
 
 	exts := blackfridayExtensions
