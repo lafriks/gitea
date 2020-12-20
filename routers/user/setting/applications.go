@@ -21,6 +21,8 @@ const (
 func Applications(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("settings")
 	ctx.Data["PageIsSettingsApplications"] = true
+	ctx.Data["BaseLink"] = "/user/settings"
+	ctx.Data["RunnerDescription"] = ctx.Tr("settings.runners_desc")
 
 	loadApplicationsData(ctx)
 
@@ -31,6 +33,8 @@ func Applications(ctx *context.Context) {
 func ApplicationsPost(ctx *context.Context, form auth.NewAccessTokenForm) {
 	ctx.Data["Title"] = ctx.Tr("settings")
 	ctx.Data["PageIsSettingsApplications"] = true
+	ctx.Data["BaseLink"] = "/user/settings"
+	ctx.Data["RunnerDescription"] = ctx.Tr("settings.runners_desc")
 
 	if ctx.HasError() {
 		loadApplicationsData(ctx)
@@ -98,5 +102,10 @@ func loadApplicationsData(ctx *context.Context) {
 			ctx.ServerError("GetOAuth2GrantsByUserID", err)
 			return
 		}
+	}
+	ctx.Data["Runners"], err = models.GetBuildRunnersByOwnerID(ctx.User.ID, models.ListOptions{})
+	if err != nil {
+		ctx.ServerError("GetOAuth2ApplicationsByUserID", err)
+		return
 	}
 }

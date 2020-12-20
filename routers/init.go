@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/models/migrations"
 	"code.gitea.io/gitea/modules/auth/sso"
+	"code.gitea.io/gitea/modules/build"
 	"code.gitea.io/gitea/modules/cache"
 	"code.gitea.io/gitea/modules/cron"
 	"code.gitea.io/gitea/modules/eventsource"
@@ -151,6 +152,10 @@ func PostInstallInit(ctx context.Context) {
 			log.Fatal("ORM engine initialization failed: %v", err)
 		}
 		svg.Init()
+
+		if err := build.Init(ctx); err != nil {
+			log.Fatal("Build server initialization failed: %v", err)
+		}
 	}
 }
 
@@ -223,4 +228,8 @@ func GlobalInit(ctx context.Context) {
 	sso.Init()
 
 	svg.Init()
+
+	if err := build.Init(ctx); err != nil {
+		log.Fatal("Failed to initialize Build server: %v", err)
+	}
 }

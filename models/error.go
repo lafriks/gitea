@@ -2090,3 +2090,25 @@ func IsErrOAuthApplicationNotFound(err error) bool {
 func (err ErrOAuthApplicationNotFound) Error() string {
 	return fmt.Sprintf("OAuth application not found [ID: %d]", err.ID)
 }
+
+// __________      .__.__       .___ __________
+// \______   \__ __|__|  |    __| _/ \______   \__ __  ____   ____   ___________
+//  |    |  _/  |  \  |  |   / __ |   |       _/  |  \/    \ /    \_/ __ \_  __ \
+//  |    |   \  |  /  |  |__/ /_/ |   |    |   \  |  /   |  \   |  \  ___/|  | \/
+//  |______  /____/|__|____/\____ |   |____|_  /____/|___|  /___|  /\___  >__|
+//         \/                    \/          \/           \/     \/     \/
+
+// ErrBuildRunnerNotExist represents a "BuildRunnerNotExist" kind of error.
+type ErrBuildRunnerNotExist struct {
+	ID int64
+}
+
+// IsErrBuildRunnerNotExist checks if an error is a ErrBuildRunnerNotExist.
+func IsErrBuildRunnerNotExist(err error) bool {
+	_, ok := err.(ErrBuildRunnerNotExist)
+	return ok
+}
+
+func (err ErrBuildRunnerNotExist) Error() string {
+	return fmt.Sprintf("build runner does not exist [id: %d]", err.ID)
+}

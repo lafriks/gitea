@@ -33,7 +33,7 @@ require (
 	github.com/ethantkoenig/rupture v0.0.0-20181029165146-c3b3b810dc77
 	github.com/gliderlabs/ssh v0.3.1
 	github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a // indirect
-	github.com/go-chi/chi v1.5.0
+	github.com/go-chi/chi v1.5.1
 	github.com/go-enry/go-enry/v2 v2.6.0
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
@@ -48,6 +48,8 @@ require (
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/context v1.1.1
+	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/hashicorp/go-hclog v0.14.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/huandu/xstrings v1.3.2

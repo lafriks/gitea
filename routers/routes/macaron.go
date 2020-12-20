@@ -300,6 +300,10 @@ func RegisterMacaronRoutes(m *macaron.Macaron) {
 		m.Combo("/keys").Get(userSetting.Keys).
 			Post(bindIgnErr(auth.AddKeyForm{}), userSetting.KeysPost)
 		m.Post("/keys/delete", userSetting.DeleteKey)
+		m.Group("/runners", func() {
+			m.Post("/delete", userSetting.DeleteRunner)
+			m.Post("/gitea/new", userSetting.GiteaRunnerNewPost)
+		})
 		m.Get("/organization", userSetting.Organization)
 		m.Get("/repos", userSetting.Repos)
 		m.Post("/repos/unadopted", userSetting.AdoptOrDeleteRepository)
@@ -365,6 +369,12 @@ func RegisterMacaronRoutes(m *macaron.Macaron) {
 			m.Get("", admin.Repos)
 			m.Combo("/unadopted").Get(admin.UnadoptedRepos).Post(admin.AdoptOrDeleteRepository)
 			m.Post("/delete", admin.DeleteRepo)
+		})
+
+		m.Group("/runners", func() {
+			m.Get("", admin.Runners)
+			m.Post("/delete", admin.DeleteRunner)
+			m.Post("/gitea/new", admin.GiteaRunnerNewPost)
 		})
 
 		m.Group("/^:configType(hooks|system-hooks)$", func() {
@@ -505,6 +515,12 @@ func RegisterMacaronRoutes(m *macaron.Macaron) {
 					m.Post("/edit", bindIgnErr(auth.CreateLabelForm{}), org.UpdateLabel)
 					m.Post("/delete", org.DeleteLabel)
 					m.Post("/initialize", bindIgnErr(auth.InitializeLabelsForm{}), org.InitializeLabels)
+				})
+
+				m.Group("/runners", func() {
+					m.Get("", org.Runners)
+					m.Post("/delete", org.DeleteRunner)
+					m.Post("/gitea/new", org.GiteaRunnerNewPost)
 				})
 
 				m.Route("/delete", "GET,POST", org.SettingsDelete)

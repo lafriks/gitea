@@ -10,6 +10,9 @@
 		<a class="{{if .PageIsOrgSettingsLabels}}active{{end}} item" href="{{.OrgLink}}/settings/labels">
 			{{.i18n.Tr "repo.labels"}}
 		</a>
+		<a class="{{if .PageIsSettingsRunners}}active{{end}} item" href="{{.OrgLink}}/settings/runners">
+			{{.i18n.Tr "org.settings.runners"}}
+		</a>
 		<a class="{{if .PageIsSettingsDelete}}active{{end}} item" href="{{.OrgLink}}/settings/delete">
 			{{.i18n.Tr "org.settings.delete"}}
 		</a>

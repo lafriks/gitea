@@ -1,0 +1,14 @@
+{{template "base/head" .}}
+<div class="page-content organization settings runners">
+	{{template "org/header" .}}
+	<div class="ui container">
+		{{template "base/alert" .}}
+		<div class="ui grid">
+			{{template "org/settings/navbar" .}}
+			<div class="twelve wide column content">
+			  {{template "admin/runner/list" .}}
+			</div>
+		</div>
+	</div>
+</div>
+{{template "base/footer" .}}

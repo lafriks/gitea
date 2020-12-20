@@ -16,6 +16,7 @@ import (
 	"text/template"
 	"time"
 
+	"code.gitea.io/gitea/modules/build"
 	"code.gitea.io/gitea/modules/httpcache"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/metrics"
@@ -46,12 +47,20 @@ func SignedUserName(req *http.Request) string {
 	return ""
 }
 
-func setupAccessLogger(c chi.Router) {
+func setupAccessLogger(c chi.Router, skipRoutes []string) {
 	logger := log.GetLogger("access")
 
 	logTemplate, _ := template.New("log").Parse(setting.AccessLogTemplate)
 	c.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			// Do not log routes with specific prefixes
+			for _, skip := range skipRoutes {
+				if strings.HasPrefix(req.RequestURI, skip) {
+					next.ServeHTTP(w, req)
+					return
+				}
+			}
+
 			start := time.Now()
 			next.ServeHTTP(w, req)
 			identity := "-"
@@ -80,9 +89,16 @@ func setupAccessLogger(c chi.Router) {
 }
 
 // LoggerHandler is a handler that will log the routing to the default gitea log
-func LoggerHandler(level log.Level) func(next http.Handler) http.Handler {
+func LoggerHandler(level log.Level, skipRoutes []string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			// Do not log routes with specific prefixes
+			for _, skip := range skipRoutes {
+				if strings.HasPrefix(req.RequestURI, skip) {
+					next.ServeHTTP(w, req)
+					return
+				}
+			}
 			start := time.Now()
 
 			_ = log.GetLogger("router").Log(0, level, "Started %s %s for %s", log.ColoredMethod(req.Method), req.RequestURI, req.RemoteAddr)
@@ -197,14 +213,18 @@ func storageHandler(storageSetting setting.Storage, prefix string, objStore stor
 func NewChi() chi.Router {
 	c := chi.NewRouter()
 	c.Use(middleware.RealIP)
+
+	// Skip logging for specific routes
+	skipLoggingRoutes := []string{"/api/build"}
+
 	if !setting.DisableRouterLog && setting.RouterLogLevel != log.NONE {
 		if log.GetLogger("router").GetLevel() <= setting.RouterLogLevel {
-			c.Use(LoggerHandler(setting.RouterLogLevel))
+			c.Use(LoggerHandler(setting.RouterLogLevel, skipLoggingRoutes))
 		}
 	}
 	c.Use(Recovery())
 	if setting.EnableAccessLog {
-		setupAccessLogger(c)
+		setupAccessLogger(c, skipLoggingRoutes)
 	}
 
 	c.Use(public.Custom(
@@ -253,6 +273,9 @@ func NormalRoutes() http.Handler {
 	r.Head("/", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+
+	// Register Build runner integration routes
+	r.Mount("/api/build/v1", build.RegisterRoutes())
 
 	if setting.HasRobotsTxt {
 		r.Get("/robots.txt", func(w http.ResponseWriter, req *http.Request) {

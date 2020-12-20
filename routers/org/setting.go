@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/auth"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/build"
 	"code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -26,6 +27,8 @@ const (
 	tplSettingsHooks base.TplName = "org/settings/hooks"
 	// tplSettingsLabels template path for render labels settings
 	tplSettingsLabels base.TplName = "org/settings/labels"
+	// tplSettingsRunners template path for render runners settings
+	tplSettingsRunners base.TplName = "org/settings/runners"
 )
 
 // Settings render the main settings page
@@ -205,4 +208,64 @@ func Labels(ctx *context.Context) {
 	ctx.Data["RequireTribute"] = true
 	ctx.Data["LabelTemplates"] = models.LabelTemplates
 	ctx.HTML(200, tplSettingsLabels)
+}
+
+// Runners render runner list page
+func Runners(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("org.settings")
+	ctx.Data["PageIsSettingsRunners"] = true
+	ctx.Data["BaseLink"] = ctx.Org.OrgLink + "/settings"
+	ctx.Data["RunnerDescription"] = ctx.Tr("org.settings.runners_desc")
+
+	loadRunnersData(ctx)
+
+	ctx.HTML(200, tplSettingsRunners)
+}
+
+// GiteaRunnerNewPost creates new Gitea build runner
+func GiteaRunnerNewPost(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("org.settings")
+	ctx.Data["PageIsSettingsRunners"] = true
+	ctx.Data["BaseLink"] = ctx.Org.OrgLink + "/settings"
+	ctx.Data["RunnerDescription"] = ctx.Tr("org.settings.runners_desc")
+
+	if ctx.HasError() {
+		loadRunnersData(ctx)
+
+		ctx.HTML(200, tplSettingsRunners)
+		return
+	}
+
+	if err := models.NewBuildRunner(ctx.Org.Organization.ID, models.GiteaRunner); err != nil {
+		ctx.ServerError("NewBuildRunner", err)
+		return
+	}
+
+	ctx.Flash.Success(ctx.Tr("org.settings.add_runner_success"))
+	ctx.Redirect(ctx.Org.OrgLink + "/settings/runners")
+}
+
+func loadRunnersData(ctx *context.Context) {
+	var err error
+	ctx.Data["Runners"], err = models.GetBuildRunnersByOwnerID(ctx.Org.Organization.ID, models.ListOptions{})
+	if err != nil {
+		ctx.ServerError("GetRunnersByOwnerID", err)
+		return
+	}
+}
+
+// DeleteRunner response for delete runner
+func DeleteRunner(ctx *context.Context) {
+	if br, err := models.DeleteBuildRunnerByOwnerID(ctx.Org.Organization.ID, ctx.QueryInt64("id")); err != nil {
+		ctx.Flash.Error("DeleteRunnerByOwnerID: " + err.Error())
+	} else {
+		if (br.Type == models.GiteaRunner) {
+			build.InvalidateRunnerBySecret(br.Secret)
+		}
+		ctx.Flash.Success(ctx.Tr("org.settings.runner_deletion_success"))
+	}
+
+	ctx.JSON(200, map[string]interface{}{
+		"redirect": ctx.Org.OrgLink + "/settings/runners",
+	})
 }
