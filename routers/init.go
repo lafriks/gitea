@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/cron"
 	"code.gitea.io/gitea/modules/eventsource"
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/gitlab"
 	"code.gitea.io/gitea/modules/highlight"
 	code_indexer "code.gitea.io/gitea/modules/indexer/code"
 	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
@@ -156,6 +157,9 @@ func PostInstallInit(ctx context.Context) {
 		if err := build.Init(ctx); err != nil {
 			log.Fatal("Build server initialization failed: %v", err)
 		}
+		if err := gitlab.Init(ctx); err != nil {
+			log.Fatal("GitLab runner support initialization failed: %v", err)
+		}
 	}
 }
 
@@ -231,5 +235,8 @@ func GlobalInit(ctx context.Context) {
 
 	if err := build.Init(ctx); err != nil {
 		log.Fatal("Failed to initialize Build server: %v", err)
+	}
+	if err := gitlab.Init(ctx); err != nil {
+		log.Fatal("GitLab runner support initialization failed: %v", err)
 	}
 }

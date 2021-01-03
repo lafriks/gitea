@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"code.gitea.io/gitea/modules/build"
+	"code.gitea.io/gitea/modules/gitlab"
 	"code.gitea.io/gitea/modules/httpcache"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/metrics"
@@ -215,7 +216,7 @@ func NewChi() chi.Router {
 	c.Use(middleware.RealIP)
 
 	// Skip logging for specific routes
-	skipLoggingRoutes := []string{"/api/build"}
+	skipLoggingRoutes := []string{"/api/build", "/api/gitlab"}
 
 	if !setting.DisableRouterLog && setting.RouterLogLevel != log.NONE {
 		if log.GetLogger("router").GetLevel() <= setting.RouterLogLevel {
@@ -276,6 +277,7 @@ func NormalRoutes() http.Handler {
 
 	// Register Build runner integration routes
 	r.Mount("/api/build/v1", build.RegisterRoutes())
+	r.Mount("/api/gitlab/api/v4", gitlab.RegisterRoutes())
 
 	if setting.HasRobotsTxt {
 		r.Get("/robots.txt", func(w http.ResponseWriter, req *http.Request) {

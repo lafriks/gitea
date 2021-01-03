@@ -17,7 +17,8 @@ type BuildRunnerType string
 
 // Types of build runner
 const (
-	GiteaRunner BuildRunnerType = "gitea"
+	GiteaRunner  BuildRunnerType = "gitea"
+	GitLabRunner BuildRunnerType = "gitlab"
 )
 
 // Name returns build runner type display name.
@@ -25,6 +26,8 @@ func (brt BuildRunnerType) Name() string {
 	switch brt {
 	case GiteaRunner:
 		return "Gitea"
+	case GitLabRunner:
+		return "GitLab"
 	default:
 		return "Unknown"
 	}
@@ -46,6 +49,10 @@ func (br *BuildRunner) Settings() map[string]string {
 	if br.Type == GiteaRunner {
 		r["GITEA_URL"] = setting.AppURL
 		r["GITEA_TOKEN"] = br.Secret
+	}
+	if br.Type == GitLabRunner {
+		r["GitLab URL"] = setting.AppURL + "api/gitlab/"
+		r["GitLab Token"] = br.Secret
 	}
 
 	return r

@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/build"
 	"code.gitea.io/gitea/modules/context"
+	"code.gitea.io/gitea/modules/gitlab"
 	"code.gitea.io/gitea/modules/setting"
 )
 
@@ -67,6 +68,8 @@ func DeleteRunner(ctx *context.Context) {
 	} else {
 		if (br.Type == models.GiteaRunner) {
 			build.InvalidateRunnerBySecret(br.Secret)
+		} else if (br.Type == models.GitLabRunner) {
+			gitlab.InvalidateRunnerBySecret(br.Secret)
 		}
 		ctx.Flash.Success(ctx.Tr("admin.runners.runner_deletion_success"))
 	}
@@ -74,4 +77,27 @@ func DeleteRunner(ctx *context.Context) {
 	ctx.JSON(200, map[string]interface{}{
 		"redirect": setting.AppSubURL + "/admin/runners",
 	})
+}
+
+// GitLabRunnerNewPost creates new Gitea build runner
+func GitLabRunnerNewPost(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("admin.runners")
+	ctx.Data["PageIsAdminRunners"] = true
+	ctx.Data["BaseLink"] = setting.AppSubURL + "/admin"
+	ctx.Data["RunnerDescription"] = ctx.Tr("admin.runners.desc")
+
+	if ctx.HasError() {
+		loadRunnersData(ctx)
+
+		ctx.HTML(200, tplAdminRunners)
+		return
+	}
+
+	if err := models.NewSystemBuildRunner(models.GitLabRunner); err != nil {
+		ctx.ServerError("NewSystemBuildRunner", err)
+		return
+	}
+
+	ctx.Flash.Success(ctx.Tr("admin.runners.add_runner_success"))
+	ctx.Redirect(setting.AppSubURL + "/admin/runners")
 }

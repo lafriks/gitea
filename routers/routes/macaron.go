@@ -375,6 +375,7 @@ func RegisterMacaronRoutes(m *macaron.Macaron) {
 			m.Get("", admin.Runners)
 			m.Post("/delete", admin.DeleteRunner)
 			m.Post("/gitea/new", admin.GiteaRunnerNewPost)
+			m.Post("/gitlab/new", admin.GitLabRunnerNewPost)
 		})
 
 		m.Group("/^:configType(hooks|system-hooks)$", func() {
