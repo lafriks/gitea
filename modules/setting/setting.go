@@ -160,6 +160,8 @@ var (
 	PasswordComplexity                 []string
 	PasswordHashAlgo                   string
 	PasswordCheckPwn                   bool
+	MasterKeyProvider                  string
+	MasterKey                          []byte
 
 	// UI settings
 	UI = struct {
@@ -794,6 +796,20 @@ func NewContext() {
 	PasswordHashAlgo = sec.Key("PASSWORD_HASH_ALGO").MustString("argon2")
 	CSRFCookieHTTPOnly = sec.Key("CSRF_COOKIE_HTTP_ONLY").MustBool(true)
 	PasswordCheckPwn = sec.Key("PASSWORD_CHECK_PWN").MustBool(false)
+
+	// Master key provider configuration
+	MasterKeyProvider = sec.Key("MASTER_KEY_PROVIDER").MustString("none")
+	switch MasterKeyProvider {
+	case "plain":
+		if MasterKey, err = base64.StdEncoding.DecodeString(sec.Key("MASTER_KEY").MustString("")); err != nil {
+			log.Fatal("error loading master key: %v", err)
+			return
+		}
+	case "none":
+	default:
+		log.Fatal("invalid master key provider type: %v", MasterKeyProvider)
+		return
+	}
 
 	InternalToken = loadInternalToken(sec)
 

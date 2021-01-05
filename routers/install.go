@@ -5,6 +5,7 @@
 package routers
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,6 +23,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/user"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/services/secrets"
 
 	"gopkg.in/ini.v1"
 )
@@ -115,6 +117,7 @@ func Install(ctx *context.Context) {
 	form.DefaultAllowCreateOrganization = setting.Service.DefaultAllowCreateOrganization
 	form.DefaultEnableTimetracking = setting.Service.DefaultEnableTimetracking
 	form.NoReplyAddress = setting.Service.NoReplyAddress
+	form.MasterKeyProvider = secrets.MasterKeyProviderTypePlain
 
 	auth.AssignForm(form, ctx.Data)
 	ctx.HTML(200, tplInstall)
@@ -271,10 +274,40 @@ func InstallPost(ctx *context.Context, form auth.InstallForm) {
 			log.Error("Failed to load custom conf '%s': %v", setting.CustomConf, err)
 		}
 	}
+
+	// Setup master key provider
+	cfg.Section("security").Key("MASTER_KEY_PROVIDER").SetValue(string(form.MasterKeyProvider))
+	var provider secrets.MasterKeyProvider
+	switch form.MasterKeyProvider {
+	case secrets.MasterKeyProviderTypePlain:
+		provider = secrets.NewPlainMasterKeyProvider()
+	}
+	var masterKey []byte
+	if provider != nil {
+		if err = provider.Init(); err != nil {
+			ctx.RenderWithErr(ctx.Tr("install.master_key_failed", err), tplInstall, &form)
+			return
+		}
+		// Generate master key
+		if _, err = provider.GenerateMasterKey(); err != nil {
+			ctx.RenderWithErr(ctx.Tr("install.master_key_failed", err), tplInstall, &form)
+			return
+		}
+		masterKey, err = provider.GetMasterKey()
+		if err != nil {
+			ctx.RenderWithErr(ctx.Tr("install.master_key_failed", err), tplInstall, &form)
+			return
+		}
+		if form.MasterKeyProvider == secrets.MasterKeyProviderTypePlain {
+			cfg.Section("security").Key("MASTER_KEY").SetValue(base64.StdEncoding.EncodeToString(masterKey))
+		}
+	}
+
 	cfg.Section("database").Key("DB_TYPE").SetValue(setting.Database.Type)
 	cfg.Section("database").Key("HOST").SetValue(setting.Database.Host)
 	cfg.Section("database").Key("NAME").SetValue(setting.Database.Name)
 	cfg.Section("database").Key("USER").SetValue(setting.Database.User)
+	// TODO: Encrypt secret
 	cfg.Section("database").Key("PASSWD").SetValue(setting.Database.Passwd)
 	cfg.Section("database").Key("SCHEMA").SetValue(setting.Database.Schema)
 	cfg.Section("database").Key("SSL_MODE").SetValue(setting.Database.SSLMode)
@@ -305,6 +338,7 @@ func InstallPost(ctx *context.Context, form auth.InstallForm) {
 			ctx.RenderWithErr(ctx.Tr("install.lfs_jwt_secret_failed", err), tplInstall, &form)
 			return
 		}
+		// TODO: Encrypt secret
 		cfg.Section("server").Key("LFS_JWT_SECRET").SetValue(secretKey)
 	} else {
 		cfg.Section("server").Key("LFS_START_SERVER").SetValue("false")
@@ -315,6 +349,7 @@ func InstallPost(ctx *context.Context, form auth.InstallForm) {
 		cfg.Section("mailer").Key("HOST").SetValue(form.SMTPHost)
 		cfg.Section("mailer").Key("FROM").SetValue(form.SMTPFrom)
 		cfg.Section("mailer").Key("USER").SetValue(form.SMTPUser)
+		// TODO: Encrypt secret
 		cfg.Section("mailer").Key("PASSWD").SetValue(form.SMTPPasswd)
 	} else {
 		cfg.Section("mailer").Key("ENABLED").SetValue("false")
@@ -353,6 +388,7 @@ func InstallPost(ctx *context.Context, form auth.InstallForm) {
 		ctx.RenderWithErr(ctx.Tr("install.secret_key_failed", err), tplInstall, &form)
 		return
 	}
+	// TODO: Encrypt secret
 	cfg.Section("security").Key("SECRET_KEY").SetValue(secretKey)
 
 	err = os.MkdirAll(filepath.Dir(setting.CustomConf), os.ModePerm)
